@@ -1,0 +1,134 @@
+http:
+    serversTransports:
+        mytransport:
+            serverName: "server"
+            insecureSkipVerify: true
+
+    routers:
+        router:
+            rule: "Host(`vm.fritz.box`)"
+            service: nginx
+            middlewares:
+                - "mid_nginxjs"
+                - "compress"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+
+        apirouter:
+            rule: "Host(`manager.vm.fritz.box`)"
+            service: api@internal
+            entryPoints:
+            - "secure"
+            - "unsecure"
+            
+        nginxrouter:
+            rule: "Host(`html.vm.fritz.box`)"
+            service: nginx
+            middlewares:
+                - "mid_nginxjs"
+                - "compress"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+
+        noderouter:
+            rule: "Host(`node.vm.fritz.box`)"
+            service: nodejs
+            middlewares:
+                - "compress"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+
+        phprouter:
+            rule: "Host(`php.vm.fritz.box`)"
+            service: haproxyphp
+            middlewares:
+                - "mid_php"
+                - "compress"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+
+        aspnetrouter:
+            rule: "Host(`aspnet.vm.fritz.box`)"
+            service: aspnet
+            middlewares:
+                - "compress"
+                - "build"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+
+        rubyrouter:
+            rule: "Host(`ruby.vm.fritz.box`)"
+            service: ruby
+            middlewares:
+                - "compress"
+            entryPoints:
+            - "secure"
+            - "unsecure"
+            
+    services:    
+        nginx:
+            loadBalancer:
+                sticky:
+                    cookie:
+                        name: sticky_session
+                        secure: false
+                        httpOnly: false
+                servers:
+                    - url: "http://nginxservice.default.svc.cluster.local"
+        nodejs:
+            loadBalancer:
+                sticky:
+                    cookie:
+                        name: sticky_session
+                        secure: false
+                        httpOnly: false
+                servers:
+                    - url: "http://nodeservice.default.svc.cluster.local"
+        haproxyphp:
+            loadBalancer:
+                sticky:
+                    cookie:
+                        name: sticky_session
+                        secure: false
+                        httpOnly: false
+                servers:
+                    - url: "http://haproxyservice.default.svc.cluster.local"
+        aspnet:
+            loadBalancer:
+                sticky:
+                    cookie:
+                        name: sticky_session
+                        secure: false
+                        httpOnly: false
+                servers:
+                    - url: "http://aspnetservice.default.svc.cluster.local"
+        ruby:
+            loadBalancer:
+                sticky:
+                    cookie:
+                        name: sticky_session
+                        secure: false
+                        httpOnly: false
+                servers:
+                    - url: "http://rubyservice.default.svc.cluster.local:3000"
+
+    middlewares:
+        compress:
+            compress: {}
+        mid_nginxjs:
+            addPrefix:
+                prefix: 
+                - "/html"
+        mid_php:
+            addPrefix:
+                prefix: 
+                - "/php"
+        build:
+            addPrefix:
+                prefix:
+                - "/build"

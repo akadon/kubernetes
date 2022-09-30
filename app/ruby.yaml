@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rubyservice
+  namespace: default
+spec:
+  selector:
+    app: ruby
+  ports:
+  - port: 3000
+    name: http
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ruby
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ruby
+  template:
+    metadata:
+      labels:
+        app: ruby
+    spec:
+
+      volumes:
+      - name: code
+        persistentVolumeClaim:
+          claimName: code
+
+      containers:
+      - name: ruby
+        workingDir: /var/www/website/ruby
+        image: local_ruby
+        imagePullPolicy: Never
+        command: ["/bin/sh","-c"]
+        args: ["bundle install && rails server"]
+
+        volumeMounts:
+        - name: code
+          mountPath: /var/www/website
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
