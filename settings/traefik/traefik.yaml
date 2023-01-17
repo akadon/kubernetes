@@ -1,0 +1,23 @@
+api:
+    dashboard: true
+
+# Static configuration
+entryPoints:
+    unsecure:
+        address: :80
+    secure:
+        address: :443
+
+# certificatesResolvers:
+#     myresolver:
+#         acme:
+#             email: h@husseinnasser.com
+#             storage: acme.json
+#             httpChallenge:
+#                 entryPoint: unsecure
+            
+providers:
+    file:
+        filename: app/traefik_dynamic.yaml
+        watch: true
+    http: {}
